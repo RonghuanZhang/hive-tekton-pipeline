@@ -1,0 +1,113 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  annotations:
+    manifestival: new
+  # Template
+  name: hive-service-git-pipeline
+spec:
+  params:
+    - name: gitRepository
+      type: string
+      description: Git repository that hosts the project
+      default: ""
+    - name: gitRevision
+      type: string
+      description: Git revision to build
+      default: "main"
+    - name: contextDir
+      type: string
+      description: Path where the project is located in the repository
+      default: ""
+    - name: imageName
+      type: string
+      description: The name of the image to build. <registry>/<namespace>/<name>:<tag>
+    - name: registry
+      type: string
+      description: The registry to push the image to. <registry>/<namespace>
+    - name: builderImage
+      type: string
+      description: Builder image to be used.
+    - name: buildEnvs
+      type: array
+      description: Environment variables to set during build time.
+    - name: groupId
+      type: string
+      description: Group ID to set on the built image.
+      default: "1000"
+    - name: userId
+      type: string
+      description: User ID to set on the built image.
+      default: "1000"
+  tasks:
+    - name: fetch-sources
+      params:
+        - name: url
+          value: $(params.gitRepository)
+        - name: revision
+          value: $(params.gitRevision)
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: version
+            value: "0.9"
+        resolver: hub
+      workspaces:
+        - name: output
+          workspace: source-workspace
+    - name: build-and-push
+      params:
+        - name: APP_IMAGE
+          value: "$(params.imageName)"
+        - name: SOURCE_SUBPATH
+          value: "$(params.contextDir)"
+        - name: CNB_BUILDER_IMAGE
+          value: "$(params.builderImage)"
+        - name: CNB_ENV_VARS
+          value: "$(params.buildEnvs[*])"
+        - name: CNB_GROUP_ID
+          value: "$(params.groupId)"
+        - name: CNB_USER_ID
+          value: "$(params.userId)"
+      results:
+        - description: The digest of the built "APP_IMAGE".
+          name: APP_IMAGE_DIGEST
+          type: string
+      taskRef:
+        - params:
+            - name: kind
+              value: task
+            - name: name
+              value: buildpacks-phases
+            - name: version
+              value: "0.3"
+      workspaces:
+        - name: source
+          workspace: source-workspace
+        - name: cache
+          workspace: cache-workspace
+    - name: display-results
+      params:
+        - name: APP_IMAGE
+          value: "$(params.imageName)"
+        - name: APP_IMAGE_DIGEST
+          value: "$(tasks.build-and-push.results.APP_IMAGE_DIGEST)"
+      taskSpec:
+        steps:
+          - name: print
+            image: docker.io/library/bash:5.1.4@sha256:b208215a4655538be652b2769d82e576bc4d0a2bb132144c060efc5be8c3f5d6
+            script: |
+              #!/usr/bin/env bash
+              set -e
+              echo "Built app image: $(params.APP_IMAGE)"
+              echo "Digest of created app image: $(params.APP_IMAGE_DIGEST)"
+      runAfter:
+        - build-and-push
+  workspaces:
+    - name: source-workspace
+      description: Directory where source code is located.
+    - name: cache-workspace
+      description: Directory where build cache is stored.
