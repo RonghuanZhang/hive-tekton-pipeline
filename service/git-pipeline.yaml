@@ -53,7 +53,7 @@ spec:
           - name: name
             value: git-clone
           - name: version
-            value: "0.9"
+            value: "0.5"
         resolver: hub
       workspaces:
         - name: output
