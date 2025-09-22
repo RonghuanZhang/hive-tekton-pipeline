@@ -95,6 +95,13 @@ spec:
         - name: APP_IMAGE_DIGEST
           value: "$(tasks.build-and-push.results.APP_IMAGE_DIGEST)"
       taskSpec:
+        params:
+          - name: APP_IMAGE
+            type: string
+            description: The name of the image built.
+          - name: APP_IMAGE_DIGEST
+            type: string
+            description: The digest of the image built.
         steps:
           - name: print
             image: docker.io/library/bash:5.1.4@sha256:b208215a4655538be652b2769d82e576bc4d0a2bb132144c060efc5be8c3f5d6
