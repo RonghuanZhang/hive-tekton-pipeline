@@ -59,6 +59,8 @@ spec:
         - name: output
           workspace: source-workspace
     - name: build-and-push
+      runAfter:
+          - fetch-sources
       params:
         - name: APP_IMAGE
           value: "$(params.imageName)"
@@ -80,6 +82,7 @@ spec:
             value: buildpacks-phases
           - name: version
             value: "0.3"
+        resolver: hub
       workspaces:
         - name: source
           workspace: source-workspace
