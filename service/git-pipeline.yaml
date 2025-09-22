@@ -72,10 +72,6 @@ spec:
           value: "$(params.groupId)"
         - name: CNB_USER_ID
           value: "$(params.userId)"
-      results:
-        - description: The digest of the built "APP_IMAGE".
-          name: APP_IMAGE_DIGEST
-          type: string
       taskRef:
         params:
           - name: kind
