@@ -39,6 +39,10 @@ spec:
       type: string
       description: User ID to set on the built image.
       default: "1000"
+    - name: knativeImage
+      type: string
+      description: Knative client image to use for deployment.
+      default: "gcr.io/knative-releases/knative.dev/client/cmd/kn:latest"
     - name: knativeNamespace
       type: string
       description: Namespace to deploy the Knative service to.
@@ -137,28 +141,57 @@ spec:
         - build-and-push
     - name: deploy-to-knative
       params:
-        - name: kn-image
-          value: "gcr.io/knative-releases/knative.dev/client/cmd/kn:latest"
+        - name: knativeImage
+          value: "$(params.knativeImage)"
+        - name: knativeType
+          value: "$(params.knativeType)"
+        - name: knativeOperation
+          value: "$(params.knativeOperation)"
+        - name: knativeName
+          value: "$(params.knativeName)"
+        - name: knativeNamespace
+          value: "$(params.knativeNamespace)"
+        - name: knativeServiceAccount
+          value: "$(params.knativeServiceAccount)"
+        - name: APP_IMAGE
+          value: "$(params.registry)/$(params.imageName)"
         - name: APP_IMAGE_DIGEST
           value: "$(tasks.build-and-push.results.APP_IMAGE_DIGEST)"
         - name: ARGS
           value:
-            - "$(params.knativeType)"
-            - "$(params.knativeOperation)"
-            - "$(params.knativeName)"
-            - "--namespace=$(params.knativeNamespace)"
-            - "--service-account=$(params.knativeServiceAccount)"
-            - "--image=$(params.registry)/$(params.imageName)@$(params.APP_IMAGE_DIGEST)"
             - "$(params.knativeArgs[*]"
       taskRef:
         params:
-          - name: kind
-            value: task
-          - name: name
-            value: kn
-          - name: version
-            value: "0.2"
-        resolver: hub
+          - name: knativeImage
+            type: string
+            default: gcr.io/knative-nightly/knative.dev/client/cmd/kn
+          - name: knativeType
+            type: string
+            default: service
+          - name: knativeOperation
+            type: string
+            default: apply
+          - name: knativeName
+            type: string
+          - name: knativeNamespace
+            type: string
+          - name: knativeServiceAccount
+            type: string
+            default: default
+          - name: knativeArgs
+            type: array
+            default: []
+        steps:
+          - name: kn
+            image: $(params.knativeImage)
+            args:
+              - "$(params.knativeType)"
+              - "$(params.knativeOperation)"
+              - "$(params.knativeName)"
+              - "--namespace=$(params.knativeNamespace)"
+              - "--service-account=$(params.knativeServiceAccount)"
+              - "--image=$(params.APP_IMAGE)@$(params.APP_IMAGE_DIGEST)"
+              - "$(params.knativeArgs[*])"
       runAfter:
         - display-results
       workspaces:
