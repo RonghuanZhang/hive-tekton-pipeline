@@ -139,6 +139,8 @@ spec:
       params:
         - name: kn-image
           value: "gcr.io/knative-releases/knative.dev/client/cmd/kn:latest"
+        - name: APP_IMAGE_DIGEST
+          value: "$(tasks.build-and-push.results.APP_IMAGE_DIGEST)"
         - name: ARGS
           value:
             - "$(params.knativeType)"
@@ -146,7 +148,7 @@ spec:
             - "$(params.knativeName)"
             - "--namespace=$(params.knativeNamespace)"
             - "--service-account=$(params.knativeServiceAccount)"
-            - "--image=$(params.registry)/$(params.imageName)@$(tasks.build-and-push.results.APP_IMAGE_DIGEST)"
+            - "--image=$(params.registry)/$(params.imageName)@$(params.APP_IMAGE_DIGEST)"
             - "$(params.knativeArgs[*]"
       taskRef:
         params:
