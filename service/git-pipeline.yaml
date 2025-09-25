@@ -66,6 +66,7 @@ spec:
     - name: knativeArgs
       type: array
       description: Additional arguments to pass to the 'kn' CLI during deployment.
+      default: []
   tasks:
     - name: fetch-sources
       params:
@@ -164,6 +165,7 @@ spec:
         params:
           - name: knativeImage
             type: string
+            default: "gcr.io/knative-releases/knative.dev/client/cmd/kn:latest"
           - name: APP_IMAGE
             type: string
           - name: APP_IMAGE_DIGEST
@@ -180,6 +182,7 @@ spec:
             type: string
           - name: knativeArgs
             type: array
+            default: []
         steps:
           - name: kn
             image: $(params.knativeImage)
