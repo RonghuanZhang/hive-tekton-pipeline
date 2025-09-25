@@ -147,7 +147,7 @@ spec:
     - name: deploy-to-knative
       params:
         - name: kn-image
-          value: "gcr.io/knative-releases/knative.dev/client/cmd/kn:latest"
+          value: "$(params.knativeImage)"
         - name: ARGS
           value:
             - "$(params.knativeType)"
