@@ -159,7 +159,7 @@ spec:
         - name: knativeServiceAccount
           value: "$(params.knativeServiceAccount)"
         - name: APP_IMAGE
-          value: "$(params.registry)/$(params.imageName)"
+          value: "$(params.registry)/$(params.imageName):$(params.imageTag)"
         - name: APP_IMAGE_DIGEST
           value: "$(tasks.build-and-push.results.APP_IMAGE_DIGEST)"
         - name: knativeArgs
