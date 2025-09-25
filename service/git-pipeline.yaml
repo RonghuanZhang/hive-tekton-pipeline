@@ -4,7 +4,6 @@ metadata:
   annotations:
     manifestival: new
   # Template
-  namespace: tenant001
   name: hive-service-git-pipeline
 spec:
   params:
@@ -169,9 +168,6 @@ spec:
         resolver: hub
       runAfter:
         - display-results
-      workspaces:
-        - name: source
-          workspace: source-workspace
   workspaces:
     - name: source-workspace
       description: Directory where source code is located.
