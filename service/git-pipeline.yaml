@@ -4,6 +4,7 @@ metadata:
   annotations:
     manifestival: new
   # Template
+  namespace: tenant001
   name: hive-service-git-pipeline
 spec:
   params:
@@ -156,7 +157,7 @@ spec:
             - "--namespace=$(params.knativeNamespace)"
             - "--service-account=$(params.knativeServiceAccount)"
             - "--image=$(params.registry)/$(params.imageName)@$(tasks.build-and-push.results.APP_IMAGE_DIGEST)"
-            - "$(params.knativeArgs[*]"
+            - "$(params.knativeArgs[*])"
       taskRef:
         params:
           - name: kind
