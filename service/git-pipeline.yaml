@@ -160,27 +160,26 @@ spec:
         - name: ARGS
           value:
             - "$(params.knativeArgs[*]"
-      taskRef:
+      taskSpec:
         params:
           - name: knativeImage
             type: string
-            default: gcr.io/knative-nightly/knative.dev/client/cmd/kn
+          - name: APP_IMAGE
+            type: string
+          - name: APP_IMAGE_DIGEST
+            type: string
           - name: knativeType
             type: string
-            default: service
           - name: knativeOperation
             type: string
-            default: apply
           - name: knativeName
             type: string
           - name: knativeNamespace
             type: string
           - name: knativeServiceAccount
             type: string
-            default: default
           - name: knativeArgs
             type: array
-            default: []
         steps:
           - name: kn
             image: $(params.knativeImage)
