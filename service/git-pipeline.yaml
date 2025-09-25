@@ -39,6 +39,29 @@ spec:
       type: string
       description: User ID to set on the built image.
       default: "1000"
+    - name: knativeNamespace
+      type: string
+      description: Namespace to deploy the Knative service to.
+      default: "default"
+    - name: knativeName
+      type: string
+      description: Name of the Knative service to create or update.
+      default: ""
+    - name: knativeServiceAccount
+      type: string
+      description: Service account to use for the Knative service.
+      default: "default"
+    - name: knativeType
+      type: string
+      description: Type of Knative resource to create (e.g., service, route).
+      default: "service"
+    - name: knativeOperation
+      type: string
+      description: Knative operation to perform (e.g., create, update).
+      default: "create"
+    - name: knativeArgs
+      type: array
+      description: Additional arguments to pass to the 'kn' CLI during deployment.
   tasks:
     - name: fetch-sources
       params:
@@ -112,6 +135,33 @@ spec:
               echo "Digest of created app image: $(params.APP_IMAGE_DIGEST)"
       runAfter:
         - build-and-push
+    - name: deploy-to-knative
+      params:
+        - name: kn-image
+          value: "gcr.io/knative-nightly/knative.dev/client/cmd/kn"
+        - name: ARGS
+          value:
+            - "$(params.knativeType)"
+            - "$(params.knativeOperation)"
+            - "$(params.knativeName)"
+            - "--namespace=$(params.knativeNamespace)"
+            - "--service-account=$(params.knativeServiceAccount)"
+            - "--image=$(params.registry)/$(params.imageName)@$(tasks.build-and-push.results.APP_IMAGE_DIGEST)"
+            - "$(params.knativeArgs[*]"
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: kn
+          - name: version
+            value: "0.2"
+        resolver: hub
+      runAfter:
+        - display-results
+      workspaces:
+        - name: source
+          workspace: source-workspace
   workspaces:
     - name: source-workspace
       description: Directory where source code is located.
