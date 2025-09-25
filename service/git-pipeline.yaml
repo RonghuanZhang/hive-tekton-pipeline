@@ -22,6 +22,10 @@ spec:
     - name: imageName
       type: string
       description: The name of the image to build.
+    - name: imageTag
+      type: string
+      description: The tag of the image to build.
+      default: "latest"
     - name: registry
       type: string
       description: The registry to push the image to. <registry>/<namespace>
@@ -91,7 +95,7 @@ spec:
           - fetch-sources
       params:
         - name: APP_IMAGE
-          value: "$(params.registry)/$(params.imageName)"
+          value: "$(params.registry)/$(params.imageName):$(params.imageTag)"
         - name: SOURCE_SUBPATH
           value: "$(params.contextDir)"
         - name: CNB_BUILDER_IMAGE
@@ -158,7 +162,7 @@ spec:
           value: "$(params.registry)/$(params.imageName)"
         - name: APP_IMAGE_DIGEST
           value: "$(tasks.build-and-push.results.APP_IMAGE_DIGEST)"
-        - name: ARGS
+        - name: knativeArgs
           value:
             - "$(params.knativeArgs[*]"
       taskSpec:
@@ -172,8 +176,10 @@ spec:
             type: string
           - name: knativeType
             type: string
+            default: "service"
           - name: knativeOperation
             type: string
+            default: "create"
           - name: knativeName
             type: string
           - name: knativeNamespace
